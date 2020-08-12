@@ -18,12 +18,20 @@
           </v-btn>
         </v-col>
       </v-row>
-      <v-row v-if="users.length === 0">
+      <v-row v-if="!loading && users.length === 0">
         <v-col xs-12 class="text-center">
           <h3>Not found user.</h3>
         </v-col>
       </v-row>
-      <v-row v-for="(user, index) in users" :key="index">
+      <v-row v-if="loading">
+        <v-col xs-12 class="text-center">
+          <v-progress-circular
+            indeterminate
+            color="primary"
+          />
+        </v-col>
+      </v-row>
+      <v-row v-for="(user, index) in (!loading ? users : [])" :key="index">
         <v-col>
           <a @click="handleShowDetailClick(user.uuid)">{{ user.email }}</a>
         </v-col>
@@ -51,28 +59,41 @@ export default {
     NewUser,
     UserDetail
   },
+  data () {
+    return {
+      loading: true
+    }
+  },
   computed: {
     users: get('user/users')
   },
   async mounted () {
+    this.loading = true
     await this.findAllUser()
+    this.loading = false
   },
   methods: {
     findAllUser: call('user/findAllUser'),
 
     async handleNewUserClick () {
       await this.$refs.newUser.show()
+      this.loading = true
       await this.findAllUser()
+      this.loading = false
     },
 
     async handleEditClick (uuid) {
       await this.$refs.newUser.show(uuid)
+      this.loading = true
       await this.findAllUser()
+      this.loading = false
     },
 
     async handleDeleteClick (uuid) {
       await userApi.deleteUser(uuid)
+      this.loading = true
       await this.findAllUser()
+      this.loading = false
     },
 
     async handleShowDetailClick (uuid) {
