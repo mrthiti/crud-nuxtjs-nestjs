@@ -251,7 +251,6 @@ export default {
       dialog: false,
       callback: null,
       uuid: null,
-      isUpdate: false,
       fName: '',
       lName: '',
       nickName: '',
@@ -270,7 +269,7 @@ export default {
           return !!value || 'กรุณาใส่ข้อมูล'
         },
         email: (value) => {
-          return !!value || 'กรุณาใส่ข้อมูล'
+          return (!!value && this.validateEmail(value)) || 'กรุณาใส่ข้อมูล Email ให้ถูกต้อง'
         },
         password: (value) => {
           return !!this.uuid || !!value || 'กรุณาใส่ข้อมูล'
@@ -296,7 +295,7 @@ export default {
         const { error: errorFindUser, data: responseFindUser } = await userApi.findUser(this.uuid)
 
         if (errorFindUser) {
-          alert('พบปัญหาในการดึงข้อมูล กรุณาลองอีกครั้ง')
+          alert(responseFindUser.data.message)
           return
         }
 
@@ -318,19 +317,6 @@ export default {
     },
 
     async handleSaveClick () {
-      console.log({
-        fName: this.fName,
-        lName: this.lName,
-        nickName: this.nickName,
-        email: this.email,
-        password: sha256(this.password),
-        facebook: this.facebook,
-        twitter: this.twitter,
-        line: this.line,
-        youtube: this.youtube,
-        website: this.website
-      })
-
       if (!this.$refs.form.validate()) { return }
 
       const user = {
@@ -369,6 +355,10 @@ export default {
     handleCancelClick () {
       this.dialog = false
       this.callback()
+    },
+
+    validateEmail (email) {
+      return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email)
     }
   }
 }
