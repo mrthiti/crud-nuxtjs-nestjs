@@ -1,6 +1,7 @@
 <template>
   <v-row justify="center">
     <NewUser ref="newUser" />
+    <UserDetail ref="userDetail" />
     <v-col lg="8">
       <v-row>
         <v-col class="text-center">
@@ -24,7 +25,7 @@
       </v-row>
       <v-row v-for="(user, index) in users" :key="index">
         <v-col>
-          {{ user.email }}
+          <a @click="handleShowDetailClick(user.uuid)">{{ user.email }}</a>
         </v-col>
         <v-col class="text-right">
           <v-icon @click="handleEditClick(user.uuid)">
@@ -42,11 +43,13 @@
 <script>
 import { get, call } from 'vuex-pathify'
 import NewUser from '../components/NewUser'
+import UserDetail from '../components/UserDetail'
 import userApi from '../api/user'
 
 export default {
   components: {
-    NewUser
+    NewUser,
+    UserDetail
   },
   computed: {
     users: get('user/users')
@@ -70,6 +73,10 @@ export default {
     async handleDeleteClick (uuid) {
       await userApi.deleteUser(uuid)
       await this.findAllUser()
+    },
+
+    async handleShowDetailClick (uuid) {
+      await this.$refs.userDetail.show(uuid)
     }
   }
 }
