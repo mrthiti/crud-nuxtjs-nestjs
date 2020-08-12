@@ -5,6 +5,8 @@
     scrollable
     width="800"
   >
+    <AlertBox ref="alertBox" />
+
     <v-card>
       <v-card-title class="headline grey lighten-2">
         New user
@@ -244,8 +246,12 @@
 <script>
 import { sha256 } from 'js-sha256'
 import userApi from '../api/user'
+import AlertBox from '../components/AlertBox'
 
 export default {
+  components: {
+    AlertBox
+  },
   data () {
     return {
       dialog: false,
@@ -295,7 +301,7 @@ export default {
         const { error: errorFindUser, data: responseFindUser } = await userApi.findUser(this.uuid)
 
         if (errorFindUser) {
-          alert(responseFindUser.data.message)
+          await this.$refs.alertBox.showAlert(responseFindUser.data.message, { typeAlertBox: 'error' })
           return
         }
 
@@ -317,7 +323,10 @@ export default {
     },
 
     async handleSaveClick () {
-      if (!this.$refs.form.validate()) { return }
+      if (!this.$refs.form.validate()) {
+        await this.$refs.alertBox.showAlert('Please complete all information.', { typeAlertBox: 'error', title: 'Error' })
+        return
+      }
 
       const user = {
         fName: this.fName,
@@ -336,14 +345,14 @@ export default {
         const { error: errorAddUser } = await userApi.updateUser(this.uuid, user)
 
         if (errorAddUser) {
-          alert(errorAddUser.data.message)
+          await this.$refs.alertBox.showAlert(errorAddUser.data.message, { typeAlertBox: 'error', title: 'Error' })
           return
         }
       } else {
         const { error: errorAddUser } = await userApi.addUser(user)
 
         if (errorAddUser) {
-          alert(errorAddUser.data.message)
+          await this.$refs.alertBox.showAlert(errorAddUser.data.message, { typeAlertBox: 'error', title: 'Error' })
           return
         }
       }

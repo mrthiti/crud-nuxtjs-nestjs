@@ -5,6 +5,8 @@
     scrollable
     width="600"
   >
+    <AlertBox ref="alertBox" />
+
     <v-card>
       <v-card-title class="headline grey lighten-2">
         User detail
@@ -93,8 +95,12 @@
 
 <script>
 import userApi from '../api/user'
+import AlertBox from '../components/AlertBox'
 
 export default {
+  components: {
+    AlertBox
+  },
   data () {
     return {
       dialog: false,
@@ -115,7 +121,7 @@ export default {
       const { error: errorFindUser, data: responseFindUser } = await userApi.findUser(uuid)
 
       if (errorFindUser) {
-        alert(errorFindUser.data.message)
+        await this.$refs.alertBox.showAlert(errorFindUser.data.message, { typeAlertBox: 'error', title: 'Error' })
         return
       }
 
