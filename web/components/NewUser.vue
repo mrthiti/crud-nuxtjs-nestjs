@@ -5,6 +5,8 @@
     scrollable
     width="800"
   >
+    <AlertBox ref="alertBox" />
+
     <v-card>
       <v-card-title class="headline grey lighten-2">
         New user
@@ -244,14 +246,17 @@
 <script>
 import { sha256 } from 'js-sha256'
 import userApi from '../api/user'
+import AlertBox from '../components/AlertBox'
 
 export default {
+  components: {
+    AlertBox
+  },
   data () {
     return {
       dialog: false,
       callback: null,
       uuid: null,
-      isUpdate: false,
       fName: '',
       lName: '',
       nickName: '',
@@ -270,7 +275,7 @@ export default {
           return !!value || 'กรุณาใส่ข้อมูล'
         },
         email: (value) => {
-          return !!value || 'กรุณาใส่ข้อมูล'
+          return (!!value && this.validateEmail(value)) || 'กรุณาใส่ข้อมูล Email ให้ถูกต้อง'
         },
         password: (value) => {
           return !!this.uuid || !!value || 'กรุณาใส่ข้อมูล'
@@ -296,7 +301,7 @@ export default {
         const { error: errorFindUser, data: responseFindUser } = await userApi.findUser(this.uuid)
 
         if (errorFindUser) {
-          alert('พบปัญหาในการดึงข้อมูล กรุณาลองอีกครั้ง')
+          await this.$refs.alertBox.showAlert(responseFindUser.data.message, { typeAlertBox: 'error' })
           return
         }
 
@@ -318,20 +323,10 @@ export default {
     },
 
     async handleSaveClick () {
-      console.log({
-        fName: this.fName,
-        lName: this.lName,
-        nickName: this.nickName,
-        email: this.email,
-        password: sha256(this.password),
-        facebook: this.facebook,
-        twitter: this.twitter,
-        line: this.line,
-        youtube: this.youtube,
-        website: this.website
-      })
-
-      if (!this.$refs.form.validate()) { return }
+      if (!this.$refs.form.validate()) {
+        await this.$refs.alertBox.showAlert('Please complete all information.', { typeAlertBox: 'error', title: 'Error' })
+        return
+      }
 
       const user = {
         fName: this.fName,
@@ -350,14 +345,14 @@ export default {
         const { error: errorAddUser } = await userApi.updateUser(this.uuid, user)
 
         if (errorAddUser) {
-          alert(errorAddUser.data.message)
+          await this.$refs.alertBox.showAlert(errorAddUser.data.message, { typeAlertBox: 'error', title: 'Error' })
           return
         }
       } else {
         const { error: errorAddUser } = await userApi.addUser(user)
 
         if (errorAddUser) {
-          alert(errorAddUser.data.message)
+          await this.$refs.alertBox.showAlert(errorAddUser.data.message, { typeAlertBox: 'error', title: 'Error' })
           return
         }
       }
@@ -369,6 +364,10 @@ export default {
     handleCancelClick () {
       this.dialog = false
       this.callback()
+    },
+
+    validateEmail (email) {
+      return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email)
     }
   }
 }

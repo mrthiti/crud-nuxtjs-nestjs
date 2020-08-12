@@ -1,6 +1,7 @@
 <template>
   <v-row justify="center">
     <NewUser ref="newUser" />
+    <UserDetail ref="userDetail" />
     <v-col lg="8">
       <v-row>
         <v-col class="text-center">
@@ -17,14 +18,40 @@
           </v-btn>
         </v-col>
       </v-row>
-      <v-row v-if="users.length === 0">
+      <v-row v-if="!loading && users.length === 0">
         <v-col xs-12 class="text-center">
           <h3>Not found user.</h3>
         </v-col>
       </v-row>
-      <v-row v-for="(user, index) in users" :key="index">
+      <v-row v-if="loading">
+        <v-col xs-12 class="text-center">
+          <v-progress-circular
+            indeterminate
+            color="primary"
+          />
+        </v-col>
+      </v-row>
+      <v-row v-if="!loading && users.length !== 0">
+        <v-col cols="2" class="text-center">
+          <h3>UUID</h3>
+        </v-col>
+        <v-col class="text-center">
+          <h3>Name</h3>
+        </v-col>
+        <v-col class="text-center">
+          <h3>Email</h3>
+        </v-col>
+        <v-col class="text-right" />
+      </v-row>
+      <v-row v-for="(user, index) in (!loading ? users : [])" :key="index">
+        <v-col cols="2" class="text-center">
+          <a @click="handleShowDetailClick(user.uuid)">{{ user.uuid }}</a>
+        </v-col>
         <v-col>
-          {{ user.email }}
+          <a @click="handleShowDetailClick(user.uuid)">{{ `${user.fName} ${user.lName}` }}</a>
+        </v-col>
+        <v-col>
+          <a @click="handleShowDetailClick(user.uuid)">{{ user.email }}</a>
         </v-col>
         <v-col class="text-right">
           <v-icon @click="handleEditClick(user.uuid)">
@@ -42,34 +69,53 @@
 <script>
 import { get, call } from 'vuex-pathify'
 import NewUser from '../components/NewUser'
+import UserDetail from '../components/UserDetail'
 import userApi from '../api/user'
 
 export default {
   components: {
-    NewUser
+    NewUser,
+    UserDetail
+  },
+  data () {
+    return {
+      loading: true
+    }
   },
   computed: {
     users: get('user/users')
   },
   async mounted () {
+    this.loading = true
     await this.findAllUser()
+    this.loading = false
   },
   methods: {
     findAllUser: call('user/findAllUser'),
 
     async handleNewUserClick () {
       await this.$refs.newUser.show()
+      this.loading = true
       await this.findAllUser()
+      this.loading = false
     },
 
     async handleEditClick (uuid) {
       await this.$refs.newUser.show(uuid)
+      this.loading = true
       await this.findAllUser()
+      this.loading = false
     },
 
     async handleDeleteClick (uuid) {
       await userApi.deleteUser(uuid)
+      this.loading = true
       await this.findAllUser()
+      this.loading = false
+    },
+
+    async handleShowDetailClick (uuid) {
+      await this.$refs.userDetail.show(uuid)
     }
   }
 }
