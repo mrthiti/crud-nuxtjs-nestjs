@@ -31,7 +31,25 @@
           />
         </v-col>
       </v-row>
+      <v-row v-if="!loading && users.length !== 0">
+        <v-col cols="2" class="text-center">
+          <h3>UUID</h3>
+        </v-col>
+        <v-col class="text-center">
+          <h3>Name</h3>
+        </v-col>
+        <v-col class="text-center">
+          <h3>Email</h3>
+        </v-col>
+        <v-col class="text-right" />
+      </v-row>
       <v-row v-for="(user, index) in (!loading ? users : [])" :key="index">
+        <v-col cols="2" class="text-center">
+          <a @click="handleShowDetailClick(user.uuid)">{{ user.uuid }}</a>
+        </v-col>
+        <v-col>
+          <a @click="handleShowDetailClick(user.uuid)">{{ `${user.fName} ${user.lName}` }}</a>
+        </v-col>
         <v-col>
           <a @click="handleShowDetailClick(user.uuid)">{{ user.email }}</a>
         </v-col>
