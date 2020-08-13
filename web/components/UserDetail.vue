@@ -120,10 +120,7 @@ export default {
     async show (uuid) {
       const { error: errorFindUser, data: responseFindUser } = await userApi.findUser(uuid)
 
-      if (errorFindUser) {
-        await this.$refs.alertBox.showAlert(errorFindUser.data.message, { typeAlertBox: 'error', title: 'Error' })
-        return
-      }
+      if (errorFindUser) { return }
 
       this.fName = responseFindUser.fName
       this.lName = responseFindUser.lName

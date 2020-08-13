@@ -116,6 +116,9 @@ export default {
 
     async handleShowDetailClick (uuid) {
       await this.$refs.userDetail.show(uuid)
+      this.loading = true
+      await this.findAllUser()
+      this.loading = false
     }
   }
 }
