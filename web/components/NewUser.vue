@@ -9,7 +9,7 @@
 
     <v-card>
       <v-card-title class="headline grey lighten-2">
-        New user
+        {{ uuid ? 'Edit user' : 'New user'}}
       </v-card-title>
 
       <v-card-text>
