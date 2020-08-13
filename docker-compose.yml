@@ -13,6 +13,8 @@ services:
     depends_on:
       - api
       - web
+      - mariadb
+      - phpmyadmin
     ports:
       - 80:80
 
@@ -26,8 +28,6 @@ services:
       - ./mariadb:/docker-entrypoint-initdb.d
     environment:
       MYSQL_ROOT_PASSWORD: 1234
-    ports:
-      - 3306:3306
     healthcheck:
       test: "/usr/bin/mysql --user=root --password=1234 --execute \"SHOW DATABASES;\""
       interval: 5s
