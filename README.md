@@ -11,3 +11,11 @@ $ docker-compose up -d --build
 ```
 
 แล้วเปิดเว็บเพื่อดูผลลัพธ์ได้ที่นี่ครับ [http://localhost](http://localhost)
+
+## Database
+
+สําหรับ Database จะใช้ MariaDB สามารถเข้า phpmyadmin ได้ที่ http://localhost:8080
+
+user: root
+
+pass: 1234
