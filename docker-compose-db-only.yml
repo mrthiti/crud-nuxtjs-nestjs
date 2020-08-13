@@ -3,22 +3,6 @@ version: "3"
 services:
 
   #######################################
-  # Nginx: gateway
-  #######################################
-  nginx-gateway:
-    image: nginx:1.17.8-alpine
-    container_name: nginx-gateway
-    volumes:
-     - ./nginx-gateway/conf.d:/etc/nginx/conf.d
-    depends_on:
-      - api
-      - web
-      - mariadb
-      - phpmyadmin
-    ports:
-      - 80:80
-
-  #######################################
   # MariaDB: MariaDB database
   #######################################
   mariadb:
@@ -28,6 +12,8 @@ services:
       - ./mariadb:/docker-entrypoint-initdb.d
     environment:
       MYSQL_ROOT_PASSWORD: 1234
+    ports:
+      - 3306:3306
     healthcheck:
       test: "/usr/bin/mysql --user=root --password=1234 --execute \"SHOW DATABASES;\""
       interval: 5s
@@ -46,23 +32,3 @@ services:
       MYSQL_ROOT_PASSWORD: 1234
     ports:
       - 8080:80
-
-  #######################################
-  # api
-  #######################################
-  api:
-    build: ./api/
-    container_name: api
-    restart: always
-    # ports:
-    #   - 9000:9000
-
-  #######################################
-  # web
-  #######################################
-  web:
-    build: ./web/
-    container_name: web
-    restart: always
-    # ports:
-    #   - 3000:3000
