@@ -1,6 +1,6 @@
 # CRUD assignment
 
-CRUD web application
+CRUD web application (Nuxt.js + Nest.js)
 
 ## How to run
 
