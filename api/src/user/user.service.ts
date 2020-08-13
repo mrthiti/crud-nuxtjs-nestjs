@@ -1,40 +1,51 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common'
-import {UserInterface} from './interfaces/user.interface'
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, Not } from 'typeorm';
+import { UserInterface } from './interfaces/user.interface'
+import { User as UserEntity } from './entity/user.entity'
 
 @Injectable()
 export class UserService {
-  private currentUuid = 0
-  private users: UserInterface[] = []
+  constructor(@InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>){}
 
-  create(user: UserInterface): void {
-    if(this.users.find(it => it.email === user.email)) throw new HttpException("Email is already", HttpStatus.BAD_REQUEST)
+  async create(user: UserInterface): Promise<void> {
+    const foundUser = await this.userRepository.findOne({ email: user.email })
 
-    this.users.push({ ...user, uuid: ++this.currentUuid })
+    if (foundUser) throw new HttpException("Email is already", HttpStatus.BAD_REQUEST)
+
+    await this.userRepository.insert(user)
   }
 
-  update(uuid: number, user: UserInterface): void {
-    if(this.users.find(it => (it.email === user.email && +it.uuid !== +uuid))) throw new HttpException("Email is already", HttpStatus.BAD_REQUEST)
+  async update(uuid: number, user: UserInterface): Promise<void> {
 
-    this.users = this.users.map(it => {
-      return (+it.uuid === +uuid)
-        ? { ...it, ...user, ...(!user.password ? {password: it.password} : {})}
-        : it
-    })
+    const foundUser = await this.userRepository.findOne({ uuid: Not(uuid), email: user.email })
+
+    if (foundUser) throw new HttpException("Email is already", HttpStatus.BAD_REQUEST)
+
+    const updateUser = await this.userRepository.findOne({ uuid })
+
+    if(!user.password) delete user.password
+
+    const update = {
+      ...updateUser,
+      ...user
+    }
+
+    await this.userRepository.save(update)
   }
 
-  delete(uuid: number): void {
-    this.users = this.users.filter(it => +it.uuid !== +uuid)
+  async delete(uuid: number): Promise<void> {
+    await this.userRepository.delete({uuid})
   }
 
-  findAll(): UserInterface[] {
-    return this.users
+  async findAll(): Promise<UserInterface[]> {
+    return await this.userRepository.find()
   }
 
-  find(uuid: number): UserInterface {
+  async find(uuid: number): Promise<UserInterface> {
+    const user = await this.userRepository.findOne({ uuid })
 
-    const user = this.users.find(it => +it.uuid === +uuid)
-
-    if(!user) throw new HttpException("Not Found", HttpStatus.NOT_FOUND)
+    if (!user) throw new HttpException("Not Found", HttpStatus.NOT_FOUND)
 
     return user
   }
